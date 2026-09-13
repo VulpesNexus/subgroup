@@ -2,10 +2,20 @@ Subgroup {VERSION} — Adobe Illustrator plugin
 Windows x64. Built against the Illustrator 2026 SDK, tested on 30.7.
 
 INSTALL
-  1. Put Subgroup.aip in a folder of its own, anywhere you like.
+  1. Put Subgroup.aip in
+       %LOCALAPPDATA%\Adobe Illustrator Plug-ins\30
+     The 30 is Illustrator 2026's version number. Next year's Illustrator
+     gets its own folder beside it: a plugin built against one year's SDK is
+     not guaranteed to load in another, and this one does not load in
+     Illustrator 2025.
   2. Illustrator > Preferences > Plug-ins & Scratch Disks, and point
      "Additional Plug-ins Folder" at that folder.
   3. Restart Illustrator.
+
+  SHARE THAT FOLDER with your other Illustrator plugins. Illustrator has one
+  Additional Plug-ins Folder, not a list, so giving each plugin a folder of
+  its own means pointing the preference at the newest one silently stops the
+  rest from loading. Everything in the one folder loads.
 
   No admin rights are needed. Deleting the .aip uninstalls it. Replacing the
   file needs Illustrator fully closed — it holds the plugin open while running.
