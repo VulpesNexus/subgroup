@@ -19,8 +19,8 @@
 /* One place for the version. Subgroup.rc builds the Windows VERSIONINFO
    resource out of both of these, and the About box shows the string. Keep them
    in step with the VERSION file at the root of the repository. */
-#define kSubgroupVersionCommas      1,0,2,0
-#define kSubgroupVersionString      "1.0.2"
+#define kSubgroupVersionCommas      1,0,3,0
+#define kSubgroupVersionString      "1.0.3"
 
 /* Wide flavors of the same text, for the Windows dialogs. The two-step
    expansion is what makes the argument expand before L is pasted onto it.
@@ -40,6 +40,17 @@
 
 #define SG_REPO_URL                 L"https://github.com/VulpesNexus/subgroup"
 #define SG_AUTHOR_URL               L"https://github.com/VulpesNexus"
+
+/** The group every plugin from this publisher shares under Help > About. The
+    SDK's own default is "About SDK Plug-ins", which describes these as Adobe
+    samples and mixes them in with everyone else's.
+
+    The name is what the helper matches on, so identical strings put two
+    plugins in one submenu rather than two. The title is taken from whichever
+    plugin creates the group first, so it has to match as well or the menu is
+    named by load order. LiveShear defines the same pair. */
+#define kSubgroupAboutGroupName     "VulpesNexusAboutPluginsGroupName"
+#define kSubgroupAboutGroupTitle    "About VulpesNexus Plug-ins"
 
 /* Persisted settings. AIPreferenceSuite takes a prefix and a suffix.
  *

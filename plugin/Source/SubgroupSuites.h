@@ -25,6 +25,7 @@
 #include "AINotifier.h"
 #include "AIPreference.h"
 #include "AIUser.h"
+#include "AIUITheme.h"
 
 extern "C" SPBlocksSuite*           sSPBlocks;
 extern "C" AIArtSuite*              sAIArt;
@@ -39,5 +40,10 @@ extern "C" AITransformArtSuite*     sAITransformArt;
    duplicate definition at link time, so we use theirs via Suites.hpp. AIUser.h
    is still included above, for the suite's own declarations. */
 extern "C" AIUnicodeStringSuite*    sAIUnicodeString;
+
+// Optional: it tells the About dialog what colours Illustrator is drawing its
+// own dialogs in. A host without it still loads the plugin, and the dialog
+// falls back to the system colours.
+extern "C" AIUIThemeSuite*          sAIUITheme;
 
 #endif /* __SUBGROUPSUITES_H__ */

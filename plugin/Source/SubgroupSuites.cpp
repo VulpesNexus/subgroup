@@ -23,6 +23,7 @@ extern "C" {
     AIPreferenceSuite*      sAIPreference       = nullptr;
     AITransformArtSuite*    sAITransformArt     = nullptr;
     AIUnicodeStringSuite*   sAIUnicodeString    = nullptr;
+    AIUIThemeSuite*         sAIUITheme          = nullptr;
 };
 
 ImportSuite gImportSuites[] =
@@ -35,5 +36,11 @@ ImportSuite gImportSuites[] =
     kAIPreferenceSuite,     kAIPreferenceSuiteVersion,  &sAIPreference,
     kAITransformArtSuite,   kAITransformArtSuiteVersion, &sAITransformArt,
     kAIUnicodeStringSuite,  kAIUnicodeStringVersion,    &sAIUnicodeString,
-    nullptr, 0, nullptr
+
+    // Everything past this marker is optional: a host that does not offer it
+    // leaves the pointer null and the plugin still loads.
+    nullptr,                kStartOptionalSuites,       nullptr,
+    kAIUIThemeSuite,        kAIUIThemeVersion,          &sAIUITheme,
+
+    nullptr, kEndAllSuites, nullptr
 };

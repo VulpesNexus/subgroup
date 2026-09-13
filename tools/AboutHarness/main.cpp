@@ -27,8 +27,28 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, LPWSTR cmdLine, int)
     /* /exit<ms> closes the dialog by itself, so a screenshot can be taken
        without anything hanging around waiting for a click. */
     int autoCloseMs = 0;
-    if (cmdLine != nullptr && wcsncmp(cmdLine, L"/exit", 5) == 0)
-        autoCloseMs = _wtoi(cmdLine + 5);
+    if (cmdLine != nullptr && wcsstr(cmdLine, L"/exit") != nullptr)
+        autoCloseMs = _wtoi(wcsstr(cmdLine, L"/exit") + 5);
+
+    /* /dark shows it in Illustrator's darkest interface colours rather than the
+       system's. The plugin reads the real numbers from the host; these are the
+       ones Illustrator 30.7 reported at its darkest setting, hard-coded here so
+       the dialog can be looked at in that theme without a copy of Illustrator
+       to ask. That is the whole point of the harness. */
+    SubgroupAboutTheme theme;
+    if (cmdLine != nullptr && wcsstr(cmdLine, L"/dark") != nullptr) {
+        theme.panel     = RGB(0x32, 0x32, 0x32);
+        theme.panelText = RGB(0xCD, 0xCD, 0xCD);
+        theme.band      = RGB(0x32, 0x32, 0x32);
+        theme.bandText  = RGB(0xCD, 0xCD, 0xCD);
+        theme.rule      = RGB(0x1E, 0x1E, 0x1E);
+        theme.link      = RGB(0x5A, 0xA9, 0xE6);
+        theme.ownerDrawButton = true;
+        theme.button       = RGB(0x46, 0x46, 0x46);
+        theme.buttonText   = RGB(0xCD, 0xCD, 0xCD);
+        theme.buttonBorder = RGB(0x1E, 0x1E, 0x1E);
+        theme.darkTitleBar = true;
+    }
 
     if (autoCloseMs > 0) {
         struct Closer {
@@ -44,7 +64,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, LPWSTR cmdLine, int)
                     0, nullptr));
     }
 
-    if (!SubgroupShowAboutDialog(instance, nullptr)) {
+    if (!SubgroupShowAboutDialog(instance, nullptr, theme)) {
         MessageBoxW(nullptr, L"SubgroupShowAboutDialog returned false: the "
                              L"dialog could not be created.",
                     L"About harness", MB_ICONERROR | MB_OK);

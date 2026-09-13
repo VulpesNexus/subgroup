@@ -1,6 +1,18 @@
 Subgroup {VERSION} — Adobe Illustrator plugin
 Windows x64. Built against the Illustrator 2026 SDK, tested on 30.7.
 
+DO NOT DOUBLE-CLICK Subgroup.aip
+
+  It is a plugin, not a document. Double-clicking it, or dragging it onto
+  Illustrator, makes Illustrator try to OPEN it as artwork, and it answers:
+
+      "Subgroup.aip" cannot be opened because the file format is unknown.
+
+  Nothing is wrong with the file when that happens. A plugin is installed by
+  putting it in a folder Illustrator reads at startup, which is the steps
+  below.
+
+
 INSTALL
   1. Put Subgroup.aip in
        %LOCALAPPDATA%\Adobe Illustrator Plug-ins\30

@@ -172,10 +172,20 @@ ASErr SubgroupPlugin::AddMenus(SPInterfaceMessage* message)
 {
     ASErr error = kNoErr;
 
+    /* Our own group, not the SDK's. Its default files third-party plugins under
+       "About SDK Plug-ins", which reads as though this were one of Adobe's
+       samples, and puts each publisher's plugins in with everybody else's.
+
+       The name is the key the helper matches on: whichever plugin loads first
+       creates the group and the rest find it and add themselves, which is how
+       every plugin from one publisher ends up in one submenu. The *title* comes
+       from whoever creates it, so every plugin sharing the group has to pass
+       the same title too -- otherwise the menu is named by load order. Both
+       strings are duplicated verbatim in LiveShear for that reason. */
     SDKAboutPluginsHelper aboutPluginsHelper;
     aboutPluginsHelper.AddAboutPluginsMenuItem(message,
-        kSDKDefAboutSDKCompanyPluginsGroupName,
-        ai::UnicodeString(kSDKDefAboutSDKCompanyPluginsGroupNameString),
+        kSubgroupAboutGroupName,
+        ai::UnicodeString(kSubgroupAboutGroupTitle),
         "Subgroup...",
         &fAboutPluginMenu);
 
@@ -662,6 +672,67 @@ void SubgroupPlugin::SettleDisclosure(AIArtHandle newGroup) const
    mojibake wherever the code page is not Latin-1. It also ends in MessageAlert,
    a plain OS alert with one run of unstyled text and no links. */
 
+#ifdef WIN_ENV
+/* Illustrator's own dialog colours, turned into the plain struct the dialog
+   takes. This is the seam: the host is asked here, so SubgroupAbout.cpp still
+   compiles without a line of Illustrator in it and tools/AboutHarness can go on
+   building the same file.
+
+   Anything missing leaves the default in place, which is the system colour --
+   the right fallback, because a guessed dark grey over a light host looks worse
+   than not theming at all. */
+static SubgroupAboutTheme AboutThemeFromHost()
+{
+    SubgroupAboutTheme theme;
+    if (sAIUITheme == nullptr || sAIUITheme->GetUIThemeColor == nullptr) return theme;
+
+    struct Wanted { AIUIComponentColor which; COLORREF* into; };
+    const Wanted wanted[] = {
+        { kAIUIComponentColorEditTextBackground, &theme.panel },
+        { kAIUIComponentColorEditText,           &theme.panelText },
+        { kAIUIComponentColorBackground,         &theme.band },
+        { kAIUIComponentColorText,               &theme.bandText },
+        { kAIUIComponentColorBorder,             &theme.rule },
+        { kAIUIComponentColorFocusRing,          &theme.link },
+    };
+
+    for (size_t i = 0; i < sizeof(wanted) / sizeof(wanted[0]); ++i) {
+        AIUIThemeColor c;
+        if (sAIUITheme->GetUIThemeColor(kAIUIThemeSelectorDialog, wanted[i].which, c) != kNoErr)
+            return SubgroupAboutTheme();   /* all or nothing, never a half-themed window */
+
+        const AIReal comp[3] = { c.red, c.green, c.blue };
+        BYTE rgb[3];
+        for (int k = 0; k < 3; ++k) {
+            const double v = static_cast<double>(comp[k]) * 255.0 + 0.5;
+            rgb[k] = (v <= 0.0) ? 0 : ((v >= 255.0) ? 255 : static_cast<BYTE>(v));
+        }
+        *(wanted[i].into) = RGB(rgb[0], rgb[1], rgb[2]);
+    }
+
+    /* The host answered, so the window is drawn entirely by us from here: a
+       stock OK button and a white caption would be the two pieces left behind
+       in system colors. The button face is the band moved away from itself,
+       in whichever direction the theme is going, so it stays distinguishable
+       at every brightness rather than only at the extremes. */
+    const bool dark = (sAIUITheme->IsUIThemeDark != nullptr) && sAIUITheme->IsUIThemeDark();
+    const int shift = dark ? 20 : -20;
+    int r = GetRValue(theme.band) + shift;
+    int g = GetGValue(theme.band) + shift;
+    int b = GetBValue(theme.band) + shift;
+    if (r < 0) r = 0; if (r > 255) r = 255;
+    if (g < 0) g = 0; if (g > 255) g = 255;
+    if (b < 0) b = 0; if (b > 255) b = 255;
+
+    theme.ownerDrawButton = true;
+    theme.button       = RGB(r, g, b);
+    theme.buttonText   = theme.bandText;
+    theme.buttonBorder = theme.rule;
+    theme.darkTitleBar = dark;
+    return theme;
+}
+#endif
+
 void SubgroupPlugin::ShowAboutBox()
 {
 #ifdef WIN_ENV
@@ -673,7 +744,7 @@ void SubgroupPlugin::ShowAboutBox()
                            GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                            reinterpret_cast<LPCWSTR>(&SubgroupPlugin::ShowAboutBox),
                            &self) && self != nullptr) {
-        if (SubgroupShowAboutDialog(self, GetActiveWindow())) return;
+        if (SubgroupShowAboutDialog(self, GetActiveWindow(), AboutThemeFromHost())) return;
     }
 #endif
 
