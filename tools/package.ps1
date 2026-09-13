@@ -16,14 +16,41 @@ $repo = Split-Path -Parent $PSScriptRoot
 $version = (Get-Content (Join-Path $repo 'VERSION') -Raw).Trim()
 if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "VERSION reads '$version'" }
 
+# What the source says, checked before the binary is looked at. The header is
+# where a release actually changes the version, so a disagreement is reported
+# in those terms rather than as a stale build.
+$idh = Join-Path $repo 'plugin\Source\SubgroupID.h'
+$source = [System.IO.File]::ReadAllText($idh)
+$numbers = 'Major', 'Minor', 'Patch' | ForEach-Object {
+    $found = [regex]::Match($source, "#define\s+kSubgroupVersion$_\s+(\d+)")
+    if (-not $found.Success) { throw "SubgroupID.h declares no kSubgroupVersion$_" }
+    $found.Groups[1].Value
+}
+$declared = $numbers -join '.'
+if ($declared -ne $version) {
+    throw "SubgroupID.h declares $declared but VERSION says $version."
+}
+
 $aip = Join-Path $repo 'install\Subgroup.aip'
 if (-not (Test-Path $aip)) { throw "no binary at $aip -- build first" }
 
 # The one failure this script exists to make impossible: packaging a binary
 # from an earlier version because the rebuild was forgotten.
-$built = (Get-Item $aip).VersionInfo.FileVersion
+#
+# Both halves of the version resource, not just one. FileVersion is the string
+# a person reads; the fixed field is four numbers stored separately, and it is
+# what Windows shows in the file's properties and what an installer would
+# compare. They are built from the same three macros, so a binary where they
+# disagree is one linked before that was true.
+$info = (Get-Item $aip).VersionInfo
+$built = $info.FileVersion
 if ($built -ne $version) {
     throw "install\Subgroup.aip is $built but VERSION says $version. Rebuild before packaging."
+}
+$fixed = '{0}.{1}.{2}.{3}' -f $info.FileMajorPart, $info.FileMinorPart,
+                              $info.FileBuildPart, $info.FilePrivatePart
+if ($fixed -ne "$version.0") {
+    throw "install\Subgroup.aip's fixed version field reads $fixed, not $version.0. Rebuild before packaging."
 }
 
 $stage = Join-Path $repo "dist\Subgroup $version"

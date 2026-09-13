@@ -16,11 +16,36 @@
 
 #define kSubgroupPluginName         "Subgroup"
 
-/* One place for the version. Subgroup.rc builds the Windows VERSIONINFO
-   resource out of both of these, and the About box shows the string. Keep them
-   in step with the VERSION file at the root of the repository. */
-#define kSubgroupVersionCommas      1,0,3,0
-#define kSubgroupVersionString      "1.0.3"
+/* One place for the version: three numbers, with every other form built out of
+   them. Subgroup.rc builds the Windows VERSIONINFO resource from the comma
+   form and the About box shows the string form, and neither is written out by
+   hand, so the two cannot come to say different things.
+
+   They used to be two hand-written lines, "1,0,3,0" and "1.0.3", which is the
+   arrangement where a release bumps one and forgets the other: the binary's
+   fixed version field and the version a person reads in the About box would
+   then disagree, and nothing would say so. The resource compiler expands these
+   macros the same way the C++ compiler does -- the stringify operator and
+   literals written side by side both work in a .rc -- so there is no reason to
+   keep a second copy for it.
+
+   Keep the numbers in step with the VERSION file at the root of the
+   repository; tools\package.ps1 refuses to package a build whose version
+   resource disagrees with that file, in either field. */
+#define kSubgroupVersionMajor       1
+#define kSubgroupVersionMinor       0
+#define kSubgroupVersionPatch       3
+
+#define SG_STRINGIFY2(x)            #x
+#define SG_STRINGIFY(x)             SG_STRINGIFY2(x)
+
+/* VERSIONINFO's fixed field takes four numbers. The fourth is the build
+   number, which nothing here counts, so it stays zero. */
+#define kSubgroupVersionCommas      kSubgroupVersionMajor,kSubgroupVersionMinor, \
+                                    kSubgroupVersionPatch,0
+#define kSubgroupVersionString      SG_STRINGIFY(kSubgroupVersionMajor) "." \
+                                    SG_STRINGIFY(kSubgroupVersionMinor) "." \
+                                    SG_STRINGIFY(kSubgroupVersionPatch)
 
 /* Wide flavors of the same text, for the Windows dialogs. The two-step
    expansion is what makes the argument expand before L is pasted onto it.
@@ -33,7 +58,12 @@
    follows. */
 #define SG_WIDEN2(x)                L ## x
 #define SG_WIDEN(x)                 SG_WIDEN2(x)
-#define SG_WVERSION                 SG_WIDEN(kSubgroupVersionString)
+/* Widened a number at a time. kSubgroupVersionString is three string literals
+   side by side rather than one token, and the paste above only ever reaches
+   the first of them. */
+#define SG_WVERSION                 SG_WIDEN(SG_STRINGIFY(kSubgroupVersionMajor)) L"." \
+                                    SG_WIDEN(SG_STRINGIFY(kSubgroupVersionMinor)) L"." \
+                                    SG_WIDEN(SG_STRINGIFY(kSubgroupVersionPatch))
 
 #define SG_EMDASH                   L"\x2014"   /* U+2014 em dash */
 #define SG_COPY                     L"\x00A9"   /* U+00A9 copyright sign */

@@ -45,7 +45,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // so anything outside it would need the file's encoding changed to match.
 
 // kSubgroupVersionCommas and kSubgroupVersionString come from SubgroupID.h,
-// included above, so the resource and the About box cannot disagree.
+// included above, and are both built there out of the same three numbers, so
+// the fixed field below, the strings below, and the About box cannot disagree.
 
 1 VERSIONINFO
  FILEVERSION kSubgroupVersionCommas
