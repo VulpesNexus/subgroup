@@ -28,8 +28,12 @@
  *
  * There are no Illustrator types here, for the same reason there are none in
  * SubgroupAbout.cpp: the About harness builds that file on its own, and this
- * header goes with it. There is no WIN_ENV guard either, for the same reason --
- * the harness does not define it, and this plugin is Windows-only regardless.
+ * header goes with it. There is no WIN_ENV guard either, because this harness
+ * does not define the macro and this plugin is Windows-only regardless.
+ *
+ * LiveShear's copy does have that guard, and its harness passes /DWIN_ENV to
+ * match. Those two lines are the whole of the difference between the two files:
+ * the code between them is identical, and should stay that way.
  */
 
 #ifndef DIALOGPLACEMENT_H
