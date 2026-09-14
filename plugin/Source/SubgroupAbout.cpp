@@ -51,6 +51,7 @@
 #include "SubgroupAbout.h"
 #include "SubgroupID.h"
 #include "Resource.h"
+#include "DialogPlacement.h"
 
 #include <commctrl.h>
 #include <shellapi.h>
@@ -286,16 +287,7 @@ INT_PTR CALLBACK AboutProc(HWND dlg, UINT msg, WPARAM wParam, LPARAM lParam)
             L"later, with an Adobe Illustrator SDK linking exception. It comes "
             L"with ABSOLUTELY NO WARRANTY.");
 
-        RECT dr;
-        GetWindowRect(dlg, &dr);
-        HWND owner = GetWindow(dlg, GW_OWNER);
-        RECT pr;
-        if (owner != nullptr && IsWindowVisible(owner)) GetWindowRect(owner, &pr);
-        else SystemParametersInfoW(SPI_GETWORKAREA, 0, &pr, 0);
-        SetWindowPos(dlg, nullptr,
-                     pr.left + ((pr.right - pr.left) - (dr.right - dr.left)) / 2,
-                     pr.top  + ((pr.bottom - pr.top) - (dr.bottom - dr.top)) / 2,
-                     0, 0, SWP_NOSIZE | SWP_NOZORDER);
+        DialogPlacement::CenterOnOwner(dlg);
 
         /* A stock button paints itself from the visual styles, which no message
            reaches. Turning it owner-drawn is the only way it follows the rest

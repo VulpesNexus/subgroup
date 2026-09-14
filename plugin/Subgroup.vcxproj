@@ -405,6 +405,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Source\DialogPlacement.h" />
     <ClInclude Include="Source\SubgroupAbout.h" />
     <ClInclude Include="Source\SubgroupID.h" />
     <ClInclude Include="Source\SubgroupPlugin.h" />

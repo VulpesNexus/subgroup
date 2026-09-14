@@ -148,9 +148,22 @@ resource into a small executable that just shows it.
 ```
 tools\AboutHarness\build.cmd     from a Visual Studio x64 command prompt
 AboutHarness.exe                 show the dialog
+AboutHarness.exe /dark           show it in Illustrator's darkest colours
 AboutHarness.exe /exit3000       show it, then close after three seconds
+AboutHarness.exe /owner:x,y,w,h  stand a window in for Illustrator's
+AboutHarness.exe /report:<file>  append where the dialog landed, then close it
 ```
 
 The harness `#include`s the plugin's dialog template rather than copying it. A
 copy would stop being evidence about what ships.
+
+`build.cmd` needs a working directory that *cmd.exe* can change into, which a path containing characters outside the system codepage is not. *tools/probe-about-placement.ps1* sidesteps that by staging the sources into a plain-ASCII directory and driving the compiler from PowerShell, so it runs wherever the repository happens to live.
+
+### Where the window opens
+
+The last two switches exist to measure the placement. The About box centers on Illustrator's window; until 1.0.4 it did only that, so a host sitting against a screen edge could put the box partly off the desktop or under the taskbar, where prose that does not scroll cannot be read. It is now pushed back inside the work area of whatever monitor it lands on, by *plugin/Source/DialogPlacement.h* — the same file, with the same reasoning, that *LiveShear* uses, because both plugins show the same window.
+
+None of this needs Illustrator: where the box opens is decided entirely by the owner window's rectangle and the monitor that rectangle falls on, so a plain window is a complete stand-in for the host. `tools\probe-about-placement.ps1` drives the cases that matter — against each edge, off each edge, and on a monitor whose origin is negative — and writes *docs/about-placement.tsv*. Each case also records where the pre-1.0.4 arithmetic would have put the window, because a check that passes equally before and after a fix has not tested the fix.
+
+Two traps are worth knowing if you extend it. *SPI_GETWORKAREA* returns the primary monitor's work area and nothing else, so it is wrong the moment a second monitor exists; ask *MonitorFromRect* and *GetMonitorInfoW* instead. And *CW_USEDEFAULT* is documented for overlapped windows only — for a popup the coordinates are taken as zero, which is not a fallback position but the top-left corner of the primary monitor.
 

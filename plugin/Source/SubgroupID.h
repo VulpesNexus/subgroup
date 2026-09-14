@@ -34,7 +34,7 @@
    resource disagrees with that file, in either field. */
 #define kSubgroupVersionMajor       1
 #define kSubgroupVersionMinor       0
-#define kSubgroupVersionPatch       3
+#define kSubgroupVersionPatch       4
 
 #define SG_STRINGIFY2(x)            #x
 #define SG_STRINGIFY(x)             SG_STRINGIFY2(x)

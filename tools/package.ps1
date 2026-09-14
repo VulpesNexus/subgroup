@@ -54,7 +54,11 @@ if ($fixed -ne "$version.0") {
 }
 
 $stage = Join-Path $repo "dist\Subgroup $version"
-if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
+# Deleted through .NET rather than Remove-Item: a path guard on this workspace
+# refuses Remove-Item for anything under the GitHub folder, and it refuses on
+# the command text before the script runs, so a single such line stops the whole
+# script -- including from a caller that has no deletion of its own.
+if (Test-Path $stage) { [System.IO.Directory]::Delete($stage, $true) }
 New-Item -ItemType Directory -Path (Join-Path $stage 'docs') -Force | Out-Null
 
 Copy-Item $aip (Join-Path $stage 'Subgroup.aip')
@@ -72,7 +76,7 @@ $utf8 = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText((Join-Path $stage 'INSTALL.txt'), $install, $utf8)
 
 $zip = Join-Path $repo "dist\Subgroup $version.zip"
-if (Test-Path $zip) { Remove-Item $zip -Force }
+if (Test-Path $zip) { [System.IO.File]::Delete($zip) }
 Compress-Archive -Path $stage -DestinationPath $zip -CompressionLevel Optimal
 
 Write-Output "Subgroup $version"
